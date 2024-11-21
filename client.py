@@ -2,6 +2,7 @@ import socket
 import threading
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+from desAlgo import DES
 
 class Client:
     def __init__(self, cliId, server_host, server_port, pka_host, pka_port):
@@ -10,6 +11,13 @@ class Client:
         self.pka_host = pka_host
         self.pka_port = pka_port
         self.cliId = cliId
+        self.algo = DES()
+        self.key_des = None
+        self.key_des_bin = None
+        self.rkb = None
+        self.rk = None
+        self.rk_rev = None
+        self.rkb_rev = None
 
         # Connect to server
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -61,8 +69,17 @@ class Client:
         """Encrypt message using RSA public key."""
         try:
             rsa_public_key = RSA.import_key(public_key.encode('utf-8'))
-            cipher = PKCS1_OAEP.new(rsa_public_key)
-            encrypted_message = cipher.encrypt(message.encode('utf-8'))
+            self.key_des = input("Enter DES key: ")
+            self.key_des_bin = self.algo.ascii_to_bin(self.key_des)
+            self.rkb, self.rk = self.algo.generate_keys(self.key_des_bin)
+            self.rk_rev = self.rk[::-1]
+            self.rkb_rev = self.rkb[::-1]
+
+            message = self.algo.ascii_to_bin(message)
+            encrypted_message = self.algo.encrypt(message, self.rkb, self.rk)
+            encrypted_message = encrypted_message.encode('utf-8')
+            # cipher = PKCS1_OAEP.new(rsa_public_key)
+            # encrypted_message = cipher.encrypt(message.encode('utf-8'))
             return encrypted_message
         except Exception as e:
             print("Encryption error:", e)
@@ -71,8 +88,10 @@ class Client:
     def decrypt_message(self, encrypted_message):
         """Decrypt message using RSA private key."""
         try:
-            cipher = PKCS1_OAEP.new(self.private_key)
-            decrypted_message = cipher.decrypt(encrypted_message).decode('utf-8')
+            # cipher = PKCS1_OAEP.new(self.private_key)
+            # decrypted_message = cipher.decrypt(encrypted_message).decode('utf-8')
+            decrypted_message = self.algo.decrypt(encrypted_message.decode('utf-8'), self.rkb_rev, self.rk_rev)
+            decrypted_message = self.algo.bin_to_ascii(decrypted_message)
             return decrypted_message
         except Exception as e:
             print("Decryption error:", e)
