@@ -1,6 +1,7 @@
 import socket
 import threading
 
+
 class PublicKeyAuthority:
     def __init__(self, host, port):
         self.host = host
@@ -14,25 +15,33 @@ class PublicKeyAuthority:
         print(f"PKA is running on {self.host}:{self.port}...")
 
     def handle_client(self, client):
+        """Handle each client connection."""
         try:
-            # Receive public key and client ID
             data = client.recv(4096).decode('utf-8')
-            cli_id, public_key = data.split('::', 1)
-            print(f"Received public key from {cli_id}:\n{public_key}")
+            print(f"Received data: {data}")  # Debugging line
 
-            # Store the public key
-            self.public_keys[cli_id] = public_key
-            print(f"Stored public key for {cli_id}.")
+            if data.startswith("STORE::"):
+                # Expecting format STORE::<cli_id>::<public_key>
+                cli_id, public_key = data.split("::", 1)[1].split("::", 1)
+                self.public_keys[cli_id] = public_key
+                print(f"Stored public key for {cli_id}.")
+                client.send(f"Public key for {cli_id} stored successfully.".encode('utf-8'))
 
-            # Send acknowledgment back to the client
-            client.send(f"Public key for {cli_id} stored successfully.".encode('utf-8'))
+            elif data.startswith("REQUEST::"):
+                # Handle request for public key
+                cli_id = data.split("::")[1]
+                if cli_id in self.public_keys:
+                    client.send(self.public_keys[cli_id].encode('utf-8'))
+                else:
+                    client.send(f"Public key for {cli_id} not found.".encode('utf-8'))
+
         except Exception as e:
             print(f"Error handling client: {e}")
         finally:
             client.close()
 
     def start(self):
-        """Start the PKA server."""
+        """Start the server to listen for connections."""
         while True:
             client, address = self.server.accept()
             print(f"Connected with {address}")
