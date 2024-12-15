@@ -136,6 +136,14 @@ class DES:
         for i in range(0, n):
             permutation = permutation + k[arr[i] - 1]
         return permutation
+
+    # def permute(self, k, arr, size):
+    #     permutation = []  # Make sure it's a list, not a string
+    #     for i in range(size):
+    #         permutation.append(k[arr[i] - 1])  # Append the item instead of concatenating
+    #     return permutation
+
+
     
     def shift_left(self, k, nth_shifts):
         s = ""
