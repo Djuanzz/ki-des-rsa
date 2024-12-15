@@ -21,14 +21,12 @@ class PublicKeyAuthority:
             print(f"Received data: {data}")  # Debugging line
 
             if data.startswith("STORE::"):
-                # Expecting format STORE::<cli_id>::<public_key>
                 cli_id, public_key = data.split("::", 1)[1].split("::", 1)
                 self.public_keys[cli_id] = public_key
                 print(f"Stored public key for {cli_id}.")
                 client.send(f"Public key for {cli_id} stored successfully.".encode('utf-8'))
 
             elif data.startswith("REQUEST::"):
-                # Handle request for public key
                 cli_id = data.split("::")[1]
                 if cli_id in self.public_keys:
                     client.send(self.public_keys[cli_id].encode('utf-8'))

@@ -1,20 +1,12 @@
-from rsa import RSACUY
-
-def main():
-    rsa = RSACUY()
-
-    rsa.generate_rsa_keys()
-
-    print("Public Key:", rsa.public_key)
-    print("Private Key:", rsa.private_key)
-
-    message = "Hello, World!"
-
-    encrypted_message = rsa.encrypt(message, rsa.public_key)
-    print("Encrypted Message:", encrypted_message)
-
-    decrypted_message = rsa.decrypt(encrypted_message)
-    print("Decrypted Message:", decrypted_message)
+from rsa import RSA
 
 if __name__ == "__main__":
-    main()
+    rsa = RSA()
+    public_key, private_key = rsa.key_generator()
+    message = "Hello RSA!"
+    encrypted_message = rsa.encrypt_string(message, public_key)
+    decrypted_message = rsa.decrypt_string(encrypted_message, private_key)
+
+    print("Original message:", message)
+    print("Encrypted message:", encrypted_message)
+    print("Decrypted message:", decrypted_message)
