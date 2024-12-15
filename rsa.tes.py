@@ -3,7 +3,7 @@ from rsa import RSA
 if __name__ == "__main__":
     rsa = RSA()
     public_key, private_key = rsa.key_generator()
-    message = "Hello RSA!"
+    message = "110001000101011"
     encrypted_message = rsa.encrypt_string(message, public_key)
     decrypted_message = rsa.decrypt_string(encrypted_message, private_key)
 
